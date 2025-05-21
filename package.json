@@ -1,0 +1,12 @@
+{
+  "name": "obf-scrapper",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Marko Nikolas",
+  "license": "GPL-2.0-only",
+  "description": "A scraper for Open Beatz Festival website.",
+  "dependencies": {
+    "jsdom": "^26.1.0",
+    "node-fetch": "^3.3.2"
+  }
+}
