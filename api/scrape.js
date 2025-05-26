@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 			let currentHeading = 'Intro'; // default if content appears before any heading
 
 			// Go through elements in order to preserve flow
-			const elements = [...main.querySelectorAll('h1, h2, h3, p')];
+			const elements = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6 p span')];
 			for (const el of elements) {
 				const tag = el.tagName.toLowerCase();
 				const text = el.textContent.trim();
