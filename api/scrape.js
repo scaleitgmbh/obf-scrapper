@@ -15,10 +15,11 @@ export default async function handler(req, res) {
 			const main = document.querySelector('main') || document.body;
 
 			const structuredContent = {};
-			let currentHeading = 'Intro'; // default if content appears before any heading
+			let currentHeading = 'Intro';
 
-			// Go through elements in order to preserve flow
-			const elements = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6 p span')];
+			// Elements to scan through
+			const elements = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span')];
+
 			for (const el of elements) {
 				const tag = el.tagName.toLowerCase();
 				const text = el.textContent.trim();
@@ -26,12 +27,20 @@ export default async function handler(req, res) {
 				if (!text) continue;
 
 				if (tag.startsWith('h')) {
-					currentHeading = text;
+					// Title-case the heading (e.g., "camping rules" => "Camping Rules")
+					currentHeading = text
+						.toLowerCase()
+						.replace(/[^\w\s-]/g, '') // remove special chars
+						.replace(/\s+/g, ' ') // normalize whitespace
+						.trim()
+						.split(' ')
+						.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+						.join(' ');
+
 					if (!structuredContent[currentHeading]) {
 						structuredContent[currentHeading] = [];
 					}
-				} else if (tag === 'p') {
-					// Filter out junk/empty text
+				} else if (tag === 'p' || tag === 'span') {
 					if (text.length > 5 && /[a-zA-Z0-9]/.test(text)) {
 						if (!structuredContent[currentHeading]) {
 							structuredContent[currentHeading] = [];
