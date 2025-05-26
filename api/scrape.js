@@ -2,17 +2,17 @@ import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 
 export default async function handler(req, res) {
-	const endpoints = ['info', 'festival', 'camping', 'impressum'];
+	const endpoints = [ 'contact', 'info', 'artists', 'festival', 'camping', 'impressum', 'agb', 'datenschutz', 'presse', 'partner', 'team', 'bewerbungen' ];
 	const results = {};
 
 	for (const endpoint of endpoints) {
 		try {
-			const fullURL = `https://openbeatz.de/en/${endpoint}`;
+			const fullURL = `https://openbeatz.de/${endpoint}`;
 			const response = await fetch(fullURL);
 			const html = await response.text();
 			const dom = new JSDOM(html);
 			const { document } = dom.window;
-			const main = document.querySelector('main') || document.body;
+			const main = document.querySelector('.entry-content') || document.body;
 
 			const structuredContent = {};
 			let currentHeading = 'Intro';
