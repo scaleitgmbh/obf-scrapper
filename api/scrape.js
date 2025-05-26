@@ -19,12 +19,7 @@ export default async function handler(req, res) {
 				.map(p => p.textContent.trim())
 				.filter(text => text.length > 5 && /[a-zA-Z0-9]/.test(text));
 
-			const headings = [...main.querySelectorAll('h1, h2, h3, h4')]
-				.map(h => h.textContent.trim())
-				.filter(text => text.length > 0);
-
 			results[endpoint] = {
-				headings,
 				paragraphs,
 			};
 		} catch (error) {
