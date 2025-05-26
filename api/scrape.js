@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
 	for (const endpoint of endpoints) {
 		try {
-			const fullURL = `https://openbeatz.de/${endpoint}`;
+			const fullURL = `https://openbeatz.de/en/${endpoint}`;
 			const response = await fetch(fullURL);
 			const html = await response.text();
 			const dom = new JSDOM(html);
