@@ -12,16 +12,36 @@ export default async function handler(req, res) {
 			const html = await response.text();
 			const dom = new JSDOM(html);
 			const { document } = dom.window;
-
 			const main = document.querySelector('main') || document.body;
 
-			const paragraphs = [...main.querySelectorAll('p')]
-				.map(p => p.textContent.trim())
-				.filter(text => text.length > 5 && /[a-zA-Z0-9]/.test(text));
+			const structuredContent = {};
+			let currentHeading = 'Intro'; // default if content appears before any heading
 
-			results[endpoint] = {
-				paragraphs,
-			};
+			// Go through elements in order to preserve flow
+			const elements = [...main.querySelectorAll('h1, h2, h3, p')];
+			for (const el of elements) {
+				const tag = el.tagName.toLowerCase();
+				const text = el.textContent.trim();
+
+				if (!text) continue;
+
+				if (tag.startsWith('h')) {
+					currentHeading = text;
+					if (!structuredContent[currentHeading]) {
+						structuredContent[currentHeading] = [];
+					}
+				} else if (tag === 'p') {
+					// Filter out junk/empty text
+					if (text.length > 5 && /[a-zA-Z0-9]/.test(text)) {
+						if (!structuredContent[currentHeading]) {
+							structuredContent[currentHeading] = [];
+						}
+						structuredContent[currentHeading].push(text);
+					}
+				}
+			}
+
+			results[endpoint] = structuredContent;
 		} catch (error) {
 			results[endpoint] = { error: error.message };
 		}
