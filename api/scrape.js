@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 
 export default async function handler(req, res) {
-	const endpoints = [ 'contact', 'info', 'artists', 'festival', 'camping', 'impressum', 'agb', 'datenschutz', 'presse', 'partner', 'team', 'bewerbungen' ];
+	const endpoints = [ 'contact', 'info', 'festival', 'camping', 'impressum', 'agb', 'datenschutz', 'team' ];
 	const results = {};
 
 	for (const endpoint of endpoints) {
