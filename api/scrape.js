@@ -1,32 +1,13 @@
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
-import Database from 'better-sqlite3';
-
-const db = new Database('./content.db');
-
-// Create the content table if it doesn't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS content (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    endpoint TEXT,
-    heading TEXT,
-    content TEXT,
-    language TEXT,
-    url TEXT
-  )
-`);
 
 export default async function handler(req, res) {
-	const endpoints = [
-		'contact', 'info', 'festival', 'camping', 'impressum',
-		'agb', 'datenschutz', 'team'
-	];
-	const language = 'en';
+	const endpoints = [ 'contact', 'info', 'festival', 'camping', 'impressum', 'agb', 'datenschutz', 'team' ];
 	const results = {};
 
 	for (const endpoint of endpoints) {
 		try {
-			const fullURL = `https://openbeatz.de/${language}/${endpoint}`;
+			const fullURL = `https://openbeatz.de/en/${endpoint}`;
 			const response = await fetch(fullURL);
 			const html = await response.text();
 			const dom = new JSDOM(html);
@@ -36,6 +17,7 @@ export default async function handler(req, res) {
 			const structuredContent = {};
 			let currentHeading = 'Intro';
 
+			// Elements to scan through
 			const elements = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span')];
 
 			for (const el of elements) {
@@ -45,14 +27,16 @@ export default async function handler(req, res) {
 				if (!text) continue;
 
 				if (tag.startsWith('h')) {
+					// Title-case the heading (e.g., "camping rules" => "Camping Rules")
 					currentHeading = text
 						.toLowerCase()
-						.replace(/[^\w\s-]/g, '')
-						.replace(/\s+/g, ' ')
+						.replace(/[^\w\s-]/g, '') // remove special chars
+						.replace(/\s+/g, ' ') // normalize whitespace
 						.trim()
 						.split(' ')
 						.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 						.join(' ');
+
 					if (!structuredContent[currentHeading]) {
 						structuredContent[currentHeading] = [];
 					}
@@ -66,22 +50,11 @@ export default async function handler(req, res) {
 				}
 			}
 
-			// Save to SQLite
-			for (const [heading, paragraphs] of Object.entries(structuredContent)) {
-				const joined = paragraphs.join('\n\n');
-				db.prepare(`
-          INSERT INTO content (endpoint, heading, content, language, url)
-          VALUES (?, ?, ?, ?, ?)
-        `).run(endpoint, heading, joined, language, fullURL);
-			}
-
 			results[endpoint] = structuredContent;
-			console.log(`✅ Saved content from ${endpoint}`);
 		} catch (error) {
 			results[endpoint] = { error: error.message };
-			console.error(`❌ Error on ${endpoint}: ${error.message}`);
 		}
 	}
 
-	res.status(200).json({ message: 'Scraping and saving complete.', results });
+	res.status(200).json(results);
 }
